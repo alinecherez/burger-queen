@@ -1,7 +1,10 @@
 import React from 'react';
+import './Auth.css';
 import firebase from '../firebaseConfig';
 import withFirebaseAuth from 'react-with-firebase-auth';
-import { BrowserRouter as Router, Route, Redirect, Link } from 'react-router-dom';
+import Btn from '../components/Button'
+import Input from '../components/Input'
+import { Tabs, Tab, Form } from 'react-bootstrap'
 
 const firebaseAppAuth = firebase.auth();
 const db = firebase.firestore();
@@ -44,67 +47,72 @@ class Auth extends React.Component {
 
   signIn = () => {
     this.props.signInWithEmailAndPassword(this.state.email, this.state.password)
-    .then(resp => {
-      const id = resp.user.uid;
-      db.collection("users").doc(id).get()
       .then(resp => {
-        const data = resp.data();
-        this.props.history.push(`/${data.usuario}`);
+        const id = resp.user.uid;
+        db.collection("users").doc(id).get()
+          .then(resp => {
+            const data = resp.data();
+            this.props.history.push(`/${data.usuario}`);
+          })
       })
-    })
   }
 
   render() {
     if (this.props.error) {
-      alert (this.props.error);
+      alert(this.props.error);
     }
     return (
       <div>
-        <h2>Faça o seu login</h2>
+        <section className="users">
+          <Tabs defaultActiveKey="Login" className="users-tabs">
+            <Tab eventKey="Login" title="Login">             
+                <h4>Faça o seu login</h4>
+                <Input
+                  type="text"
+                  value={this.state.email}
+                  text="Email"
+                  onChange={(e) => this.handleChange(e, "email")} />
+                <Input
+                  type="password"
+                  value={this.state.password}
+                  text="Senha"
+                  onChange={(e) => this.handleChange(e, "password")} />
+                <Btn text="Entrar" onClick={this.signIn} />           
+            </Tab>
+            <Tab eventKey="CreateUser" title="Cadastro">
+              <h4>É novo? Crie uma conta</h4>
+              <Input
+                type="text"
+                value={this.state.name}
+                text="Nome"
+                onChange={(e) => this.handleChange(e, "name")} />
 
-        <input value={this.state.email}
-          placeholder="Email"
-          onChange={(e) => this.handleChange(e, "email")} />
+              <Input
+                type="text"
+                value={this.state.newEmail}
+                text="Email"
+                onChange={(e) => this.handleChange(e, "newEmail")} />
 
+              <Input
+                type="password"
+                value={this.state.newPassword}
+                text="Senha"
+                onChange={(e) => this.handleChange(e, "newPassword")} />              
 
-        <input value={this.state.password}
-          placeholder="Senha"
-          onChange={(e) => this.handleChange(e, "password")} />
+              <Form.Control as="select" className="drop-menu" onChange={(e) => this.handleChange(e, "userType")}>
+                <option defaultselected="true">Tipo de usuário</option>
+                <option value="kitchen">Cozinha</option>
+                <option value="order">Salão</option>
+              </Form.Control>
 
-        <Button text="Entrar" onClick={this.signIn} />
+              <Btn text="Cadastro" onClick={this.createUser} />
+            </Tab>
+          </Tabs>         
+        </section>
 
-        <h2>É novo? Crie uma conta</h2>
-
-        <input value={this.state.name}
-          placeholder="Nome"
-          onChange={(e) => this.handleChange(e, "name")} />
-
-        <select onChange={(e) => this.handleChange(e, "userType")}>
-          <option defaultselected="true">Tipo de usuário</option>
-          <option value="kitchen">Cozinha</option>
-          <option value="order">Salão</option>
-        </select>
-
-        <input value={this.state.newEmail}
-          placeholder="Email"
-          onChange={(e) => this.handleChange(e, "newEmail")} />
-
-        <input value={this.state.newPassword}
-          placeholder="Senha"
-          onChange={(e) => this.handleChange(e, "newPassword")} />
-
-        <Button text="Cadastro" onClick={this.createUser} />
       </div>
     )
   }
-}
-
-function Button(props) {
-  return (
-    <button className="button" onClick={props.onClick}>
-      {props.text}
-    </button>
-  );
 }
 
 export default withFirebaseAuth({

@@ -28,13 +28,54 @@ class Order extends React.Component {
   }
 
   orderClick = (item) => {
-    this.setState({
-      order: this.state.order.concat(item)
+    const itemIndex = this.state.order.findIndex((product) => {
+      return product.item === item.item;
     });
+    if (itemIndex < 0) {
+      const newItem = {
+        ...item,
+        quantity: 1
+      };
+      this.setState({
+        order: this.state.order.concat(newItem)
+      });
+    } else {
+      let newOrder = this.state.order;
+      newOrder[itemIndex].quantity += 1;
+      this.setState({
+        order: newOrder
+      });
+    }
+  }
+
+  delClick = (item) => {
+    const itemIndex = this.state.order.findIndex((product) => {
+      return product.item === item.item;
+    });
+    let newOrder = this.state.order;
+      newOrder[itemIndex].quantity -= 1;
+
+    const quantity = newOrder[itemIndex].quantity;
+    if (quantity > 0) {
+      this.setState({
+        order: newOrder
+      });
+    } else {
+      newOrder.splice(itemIndex, 1);
+      this.setState({
+        order: newOrder
+      });
+    }
+      this.setState({
+        order: newOrder
+      });
   }
 
   render() {
-    console.log(this.state.order);
+    const totalOrder = this.state.order.reduce((acc, cur) => {
+      return acc + (cur.quantity * cur.price)
+    }, 0);
+
     return (
       <div>
         {
@@ -43,6 +84,20 @@ class Order extends React.Component {
               onClick={() => this.orderClick(product)}>
               {product.item}</button>
           })
+        }
+        <h2>Pedido</h2>
+        {
+          this.state.order.map((product, i) => {
+            return <div key={i}>
+              <p>{product.quantity} | {product.item} | {product.price} | {product.price * product.quantity}</p>
+              <button onClick={() =>
+              this.delClick(product)}></button>
+              </div>
+          })
+        }
+        <h2>Total</h2>
+        {
+          <p>R$ {totalOrder}</p>
         }
       </div>
     );
