@@ -1,10 +1,10 @@
 import React from 'react';
-import './Auth.css';
+import './auth.css';
 import firebase from '../firebaseConfig';
 import withFirebaseAuth from 'react-with-firebase-auth';
 import Btn from '../components/Button'
 import Input from '../components/Input'
-import { Tabs, Tab, Form } from 'react-bootstrap'
+import { Tabs, Tab, Form, Alert } from 'react-bootstrap'
 
 const firebaseAppAuth = firebase.auth();
 const db = firebase.firestore();
@@ -18,7 +18,8 @@ class Auth extends React.Component {
       name: "",
       userType: "",
       newEmail: "",
-      newPassword: ""
+      newPassword: "",
+      error: false
     };
   }
 
@@ -48,19 +49,23 @@ class Auth extends React.Component {
   signIn = () => {
     this.props.signInWithEmailAndPassword(this.state.email, this.state.password)
       .then(resp => {
+
+        if(typeof resp === 'undefined') return this.setState({error: true})
+    
         const id = resp.user.uid;
         db.collection("users").doc(id).get()
           .then(resp => {
             const data = resp.data();
             this.props.history.push(`/${data.usuario}`);
           })
+        
       })
+      .catch(error => console.log(error))
   }
 
   render() {
-    if (this.props.error) {
-      alert(this.props.error);
-    }
+    const { error } = this.props;
+
     return (
       <div>
         <section className="users">
@@ -68,7 +73,7 @@ class Auth extends React.Component {
             <Tab eventKey="Login" title="Login">             
                 <h4>Faça o seu login</h4>
                 <Input
-                  type="text"
+                  type="email"
                   value={this.state.email}
                   text="Email"
                   onChange={(e) => this.handleChange(e, "email")} />
@@ -88,7 +93,7 @@ class Auth extends React.Component {
                 onChange={(e) => this.handleChange(e, "name")} />
 
               <Input
-                type="text"
+                type="email"
                 value={this.state.newEmail}
                 text="Email"
                 onChange={(e) => this.handleChange(e, "newEmail")} />
@@ -107,7 +112,13 @@ class Auth extends React.Component {
 
               <Btn text="Cadastro" onClick={this.createUser} />
             </Tab>
-          </Tabs>         
+          </Tabs>
+          { error && (
+            <Alert variant="warning">
+              { error }
+            </Alert>
+            )
+          }     
         </section>
 
       </div>

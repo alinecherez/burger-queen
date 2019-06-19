@@ -1,21 +1,100 @@
-import React from "react";
+import React from 'react';
+import './order.css';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
+import SignOutButton from '../components/SignOut';
+import Btn from '../components/Button';
+import Input from '../components/Input';
+import { Tabs, Tab, Table } from 'react-bootstrap';
+import firebase from '../firebaseConfig';
 
-const menu = [
+const db = firebase.firestore();
+
+const breakfast = [
   {
-    item: "Café americano",
+    name: "Café americano",
     price: 5
   },
   {
-    item: "Café com leite",
+    name: "Café com leite",
     price: 7
   },
   {
-    item: "Sanduíche de presunto e queijo",
+    name: "Sanduíche de presunto e queijo",
     price: 10
   },
   {
-    item: "Suco natural de fruta",
+    name: "Suco natural de fruta",
     price: 7
+  },
+];
+
+const burger = [
+  {
+    name: "Burger simples Bovino",
+    price: 10
+  },
+  {
+    name: "Burger simples Frango",
+    price: 10
+  },
+  {
+    name: "Burger simples Veggie",
+    price: 10
+  },
+  {
+    name: "Burger duplo Bovino",
+    price: 15
+  },
+
+  {
+    name: "Burger duplo Frango",
+    price: 15
+  },
+  {
+    name: "Burger duplo Veggie",
+    price: 15
+  }
+];
+
+const sideDish = [
+  {
+    name: "Batata frita",
+    price: 5
+  },
+  {
+    name: "Anéis de cebola",
+    price: 5
+  }
+];
+
+const beverages = [
+  {
+    name: "Água 500ml",
+    price: 5
+  },
+  {
+    name: "Água 750ml",
+    price: 7
+  },
+  {
+    name: "Bebida gaseificada 500ml",
+    price: 7
+  },
+  {
+    name: "Bebida gaseificada 750ml",
+    price: 10
+  }
+];
+
+const extras = [
+  {
+    name: "Queijo",
+    price: 1
+  },
+  {
+    name: "Ovo",
+    price: 1
   },
 ];
 
@@ -23,13 +102,33 @@ class Order extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      order: []
+      order: [],
+      client: ""
     };
+  }
+
+  handleChange = (event, element) => {
+    const newState = this.state;
+    newState[element] = event.target.value
+    this.setState(newState);
+  }
+
+  sendToKitchen = () => {
+    const object = {
+      order: this.state.order,
+      client: this.state.client
+    }
+    db.collection('orders').add(object)
+    this.setState({
+      order: [],
+      client: ""
+    });
+    alert("Pedido enviado")
   }
 
   orderClick = (item) => {
     const itemIndex = this.state.order.findIndex((product) => {
-      return product.item === item.item;
+      return product.name === item.name;
     });
     if (itemIndex < 0) {
       const newItem = {
@@ -50,11 +149,10 @@ class Order extends React.Component {
 
   delClick = (item) => {
     const itemIndex = this.state.order.findIndex((product) => {
-      return product.item === item.item;
+      return product.name === item.name;
     });
     let newOrder = this.state.order;
-      newOrder[itemIndex].quantity -= 1;
-
+    newOrder[itemIndex].quantity -= 1;
     const quantity = newOrder[itemIndex].quantity;
     if (quantity > 0) {
       this.setState({
@@ -66,9 +164,6 @@ class Order extends React.Component {
         order: newOrder
       });
     }
-      this.setState({
-        order: newOrder
-      });
   }
 
   render() {
@@ -77,28 +172,111 @@ class Order extends React.Component {
     }, 0);
 
     return (
-      <div>
+      <div className="order">
+        <SignOutButton></SignOutButton>
+        <Input
+          type="text"
+          value={this.state.client}
+          text="Nome do cliente"
+          onChange={(e) => this.handleChange(e, "client")} />
+        <h4>Menu</h4>
+        <menu className="menu">
+          <Tabs defaultActiveKey="Café da manha" className="menu-tab">      
+                  
+           
+            <Tab eventKey="Café da manha" title="Café da manhã">
+              {
+                breakfast.map((product, i) => {
+                  return <button
+                    className="product-btn"
+                    key={i}
+                    onClick={() => this.orderClick(product)}>
+                    {product.name}
+                  </button>
+                })
+              }
+            </Tab>
+            <Tab eventKey="Burger" title="Burger">
+              {
+                burger.map((product, i) => {
+                  return <button
+                    className="product-btn"
+                    key={i}
+                    onClick={() => this.orderClick(product)}>
+                    {product.name}
+                  </button>
+                })
+              }
+            </Tab>
+            <Tab eventKey="Extras" title="Extras">
+              {
+                extras.map((product, i) => {
+                  return <button
+                    className="product-btn"
+                    key={i}
+                    onClick={() => this.orderClick(product)}>
+                    {product.name}
+                  </button>
+                })
+              }
+            </Tab>
+            <Tab eventKey="Acompanhamentos" title="Acompanhamentos">
+              {
+                sideDish.map((product, i) => {
+                  return <button
+                    className="product-btn"
+                    key={i}
+                    onClick={() => this.orderClick(product)}>
+                    {product.name}
+                  </button>
+                })
+              }
+            </Tab>
+            <Tab eventKey="Bebidas" title="Bebidas">
+              {
+                beverages.map((product, i) => {
+                  return <button
+                    className="product-btn"
+                    key={i}
+                    onClick={() => this.orderClick(product)}>
+                    {product.name}
+                  </button>
+                })
+              }
+            </Tab>
+          </Tabs>
+        </menu>
+        <h4>Pedido</h4>
+        <Table striped bordered hover>
+          <thead>
+            <tr>
+              <th>Quantidade</th>
+              <th>Item</th>
+              <th>R$ unitário</th>
+              <th>R$ subtotal</th>
+              <th>Excluir item</th>
+            </tr>
+          </thead>
+          <tbody >
+            {
+              this.state.order.map((product, i) => {
+                return (
+                  <tr key={i}>
+                    <td>{product.quantity}</td>
+                    <td>{product.name}</td>
+                    <td>{product.price}</td>
+                    <td>{product.price * product.quantity}</td>
+                    <td><button onClick={() => this.delClick(product)}><FontAwesomeIcon icon={faTrashAlt} /></button></td>
+                  </tr>
+                );
+              })
+            }
+          </tbody>
+        </Table>
         {
-          menu.map((product, i) => {
-            return <button key={i}
-              onClick={() => this.orderClick(product)}>
-              {product.item}</button>
-          })
+          <h4>Total R$ {totalOrder}</h4>
         }
-        <h2>Pedido</h2>
-        {
-          this.state.order.map((product, i) => {
-            return <div key={i}>
-              <p>{product.quantity} | {product.item} | {product.price} | {product.price * product.quantity}</p>
-              <button onClick={() =>
-              this.delClick(product)}></button>
-              </div>
-          })
-        }
-        <h2>Total</h2>
-        {
-          <p>R$ {totalOrder}</p>
-        }
+        <Btn text="Enviar pedido" onClick={this.sendToKitchen} />
       </div>
     );
   }

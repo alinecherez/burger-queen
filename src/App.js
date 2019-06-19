@@ -1,26 +1,29 @@
 import React from 'react';
 import './App.css';
-import Auth from './pages/Auth';
+import logo from './img/logo.png';
+import { BrowserRouter as Router, Route } from 'react-router-dom';
+import Auth from './pages/auth';
 import Order from './pages/order';
 import Kitchen from './pages/kitchen';
-import { BrowserRouter as Router, Route, Redirect, Link } from 'react-router-dom';
-import logo from './img/logo.png';
-
+import PrivateRoute from './components/PrivateRoute';
+import { AuthProvider } from "./components/Auth";
 
 function App() {
   return (
-    <Router>
-      <div className="App">
-        <header className="App-header">
-        <img className="App-logo" src={logo} alt="Logo Burger Queen" />
-        </header>
-        <body>
-          <Route path="/" exact component={Auth} />
-          <Route path="/order" component={Order} />
-          <Route path="/kitchen" component={Kitchen} />
-        </body>
-      </div>
-    </Router>
+    <AuthProvider>
+      <Router>
+        <div className="App">
+          <header className="App-header">
+            <img className="App-logo" src={logo} alt="Logo Burger Queen" />
+          </header>
+          <div>
+            <Route exact path="/" component={Auth} />
+            <PrivateRoute path="/order" component={Order} />
+            <PrivateRoute path="/kitchen" component={Kitchen} />
+          </div>
+        </div>
+      </Router>
+    </AuthProvider>
   );
 }
 

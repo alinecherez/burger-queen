@@ -3,6 +3,10 @@ import ReactDOM from 'react-dom';
 import App from './App';
 import * as serviceWorker from './serviceWorker';
 import 'bootstrap/dist/css/bootstrap.css';
+import '@fortawesome/free-solid-svg-icons';
+import '@fortawesome/react-fontawesome';
+import '@fortawesome/fontawesome-svg-core'
+
 
 ReactDOM.render(<App />, document.getElementById('root'));
 

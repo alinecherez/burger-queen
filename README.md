@@ -1,7 +1,5 @@
 # Burger Queen
 
-## Índice
-
 ## Resumo do projeto
 
 Aplicativo web desenvolvido para o restaurante Burger Queen, fast food 24hrs.
